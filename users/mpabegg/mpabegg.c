@@ -38,50 +38,62 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     )
 };
 
-
-#ifdef RGBLIGHT_ENABLE
-const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {0, 1, HSV_ORANGE},
-    {1, 8, HSV_ORANGE}
-);
-const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {0, 1, HSV_GREEN},
-    {1, 9, HSV_GREEN}
-);
-const rgblight_segment_t PROGMEM my_layer3_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {0, 1, HSV_RED},
-    {1, 8, HSV_RED}
-);
-const rgblight_segment_t PROGMEM my_layer4_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {0, 1, HSV_PURPLE},
-    {1, 8, HSV_PURPLE}
-);
-
-const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
-    my_layer1_layer,    // Overrides base layer
-    my_layer2_layer,    // Overrides other layers
-    my_layer3_layer,     // Overrides other layers
-    my_layer4_layer     // Overrides other layers
-);
-
+#ifdef RGB_MATRIX_ENABLE
 void keyboard_post_init_user(void) {
-    // Enable the LED layers
-    rgblight_enable_noeeprom(); // Enables RGB, without saving settings
-    rgblight_sethsv_noeeprom(HSV_ORANGE);
-    rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
-    rgblight_layers = my_rgb_layers;
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+    rgb_matrix_sethsv_noeeprom(HSV_WHITE);
 }
-
-
-layer_state_t default_layer_state_set_user(layer_state_t state) {
-    rgblight_set_layer_state(0, layer_state_cmp(state, BASE));
-    return state;
-}
-
-layer_state_t layer_state_set_user(layer_state_t state) {
-    rgblight_set_layer_state(1, layer_state_cmp(state, NUM));
-    rgblight_set_layer_state(2, layer_state_cmp(state, NAV));
-    rgblight_set_layer_state(3, layer_state_cmp(state, EXTRA));
-    return state;
+bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+    if (get_highest_layer(layer_state) > 0) {
+        uint8_t layer = get_highest_layer(layer_state|default_layer_state);
+        for (uint8_t i = led_min; i < led_max; i++) {
+            if (g_led_config.flags[i] & LED_FLAG_UNDERGLOW) {
+                switch (layer) {
+                    case BASE:
+                        rgb_matrix_set_color(i, RGB_WHITE);
+                        break;
+                    case NUM:
+                        rgb_matrix_set_color(i, RGB_GREEN);
+                        break;
+                    case NAV:
+                        rgb_matrix_set_color(i, RGB_RED);
+                        break;
+                    case EXTRA:
+                        rgb_matrix_set_color(i, RGB_BLUE);
+                        break;
+                    default:
+                        rgb_matrix_set_color(i, RGB_OFF);
+                }
+            }
+        }
+        for (uint8_t row = 0; row < MATRIX_ROWS; ++row) {
+            for (uint8_t col = 0; col < MATRIX_COLS; ++col) {
+                uint8_t index = g_led_config.matrix_co[row][col];
+                if (index >= led_min && index < led_max && index != NO_LED ) {
+                    if (keymap_key_to_keycode(layer, (keypos_t){col,row}) > KC_TRNS) {
+                        switch (layer) {
+                            case BASE:
+                                rgb_matrix_set_color(index, RGB_WHITE);
+                                break;
+                            case NUM:
+                                rgb_matrix_set_color(index, RGB_GREEN);
+                                break;
+                            case NAV:
+                                rgb_matrix_set_color(index, RGB_RED);
+                                break;
+                            case EXTRA:
+                                rgb_matrix_set_color(index, RGB_BLUE);
+                                break;
+                            default:
+                                rgb_matrix_set_color(index, RGB_OFF);
+                        }
+                    } else {
+                        rgb_matrix_set_color(index, RGB_OFF);
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 #endif
