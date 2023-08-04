@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include QMK_KEYBOARD_H
+#include "mpabegg.h"
 
 // Layers
 enum Layers {
@@ -10,6 +11,25 @@ enum Layers {
   NAV,
   EXTRA
 };
+
+void set_color_for_layer(uint8_t index) {
+#ifdef RGB_MATRIX_ENABLE
+    switch (get_highest_layer(layer_state)) {
+        case NUM:
+            rgb_matrix_set_color(index, RGB_RED);
+            break;
+        case NAV:
+            rgb_matrix_set_color(index, RGB_BLUE);
+            break;
+        case EXTRA:
+            rgb_matrix_set_color(index, RGB_GREEN);
+            break;
+        default:
+            rgb_matrix_set_color(index, RGB_OFF);
+    }
+#endif
+};
+
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [BASE] = LAYOUT_split_3x6_3(
@@ -44,49 +64,20 @@ void keyboard_post_init_user(void) {
     rgb_matrix_sethsv_noeeprom(HSV_WHITE);
 }
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+    uint8_t layer = get_highest_layer(layer_state|default_layer_state);
     if (get_highest_layer(layer_state) > 0) {
-        uint8_t layer = get_highest_layer(layer_state|default_layer_state);
-        for (uint8_t i = led_min; i < led_max; i++) {
-            if (g_led_config.flags[i] & LED_FLAG_UNDERGLOW) {
-                switch (layer) {
-                    case BASE:
-                        rgb_matrix_set_color(i, RGB_WHITE);
-                        break;
-                    case NUM:
-                        rgb_matrix_set_color(i, RGB_GREEN);
-                        break;
-                    case NAV:
-                        rgb_matrix_set_color(i, RGB_RED);
-                        break;
-                    case EXTRA:
-                        rgb_matrix_set_color(i, RGB_BLUE);
-                        break;
-                    default:
-                        rgb_matrix_set_color(i, RGB_OFF);
-                }
-            }
-        }
+        /* for (uint8_t i = led_min; i < led_max; i++) { */
+        /*     if (g_led_config.flags[i] & LED_FLAG_UNDERGLOW) { */
+        /*         set_color_for_layer(i); */
+        /*     } */
+        /* } */
         for (uint8_t row = 0; row < MATRIX_ROWS; ++row) {
             for (uint8_t col = 0; col < MATRIX_COLS; ++col) {
                 uint8_t index = g_led_config.matrix_co[row][col];
                 if (index >= led_min && index < led_max && index != NO_LED ) {
-                    if (keymap_key_to_keycode(layer, (keypos_t){col,row}) > KC_TRNS) {
-                        switch (layer) {
-                            case BASE:
-                                rgb_matrix_set_color(index, RGB_WHITE);
-                                break;
-                            case NUM:
-                                rgb_matrix_set_color(index, RGB_GREEN);
-                                break;
-                            case NAV:
-                                rgb_matrix_set_color(index, RGB_RED);
-                                break;
-                            case EXTRA:
-                                rgb_matrix_set_color(index, RGB_BLUE);
-                                break;
-                            default:
-                                rgb_matrix_set_color(index, RGB_OFF);
-                        }
+                    if (keymap_key_to_keycode(layer, (keypos_t){col,row}) != KC_TRNS &&
+                            keymap_key_to_keycode(layer, (keypos_t){col,row}) != KC_NO) {
+                        set_color_for_layer(index);
                     } else {
                         rgb_matrix_set_color(index, RGB_OFF);
                     }
