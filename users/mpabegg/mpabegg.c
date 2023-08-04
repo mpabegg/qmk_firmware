@@ -16,7 +16,7 @@ void set_color_for_layer(uint8_t layer, uint8_t index) {
 #ifdef RGB_MATRIX_ENABLE
     switch (layer) {
         case NUM:
-            rgb_matrix_set_color(index, RGB_RED);
+            rgb_matrix_set_color(index, RGB_CYAN);
             break;
         case NAV:
             rgb_matrix_set_color(index, RGB_BLUE);
@@ -60,7 +60,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 #ifdef RGB_MATRIX_ENABLE
 void keyboard_post_init_user(void) {
-    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_PIXEL_FLOW);
     rgb_matrix_sethsv_noeeprom(HSV_WHITE);
 }
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {

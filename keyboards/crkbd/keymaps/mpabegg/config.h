@@ -38,4 +38,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     #define RGBLIGHT_VAL_STEP 17
 #endif
 
+#ifdef RGB_MATRIX_ENABLE
+#define ENABLE_RGB_MATRIX_PIXEL_FRACTAL
+#define ENABLE_RGB_MATRIX_PIXEL_FLOW
+#define ENABLE_RGB_MATRIX_PIXEL_RAIN
+#endif
+
 #define OLED_FONT_H "keyboards/crkbd/lib/glcdfont.c"
