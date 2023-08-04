@@ -12,7 +12,7 @@
 
 #define PERMISSIVE_HOLD
 
-#define MASTER_LEFT
+#define MASTER_RIGHT
 
 // Mouse key speed and acceleration.
 #undef MOUSEKEY_DELAY
